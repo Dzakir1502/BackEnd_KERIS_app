@@ -7,7 +7,7 @@ import Course from "./Course";
 interface IEnrollmentAttributes {
   id: number;
   userId: number;
-  mentorId: number;
+  mentorId: number | null;
   trackName: string;
   duration: number;
   startDate: Date;
@@ -32,21 +32,20 @@ interface ICourseEnrollmentAttributes {
 }
 
 interface IEnrollmentCreationAttributes
-  extends Optional<IEnrollmentAttributes, "id" | "startDate" | "progress" | "status" | "createdAt" | "updatedAt"> {}
+  extends Optional<IEnrollmentAttributes, "id" | "startDate" | "progress" | "status" | "createdAt" | "updatedAt"> { }
 
 interface ICourseEnrollmentCreationAttributes
   extends Optional<
     ICourseEnrollmentAttributes,
     "id" | "enrolledDate" | "progress" | "completedLessons" | "completedModules" | "status" | "createdAt" | "updatedAt"
-  > {}
+  > { }
 
 export class Enrollment
   extends Model<IEnrollmentAttributes, IEnrollmentCreationAttributes>
-  implements IEnrollmentAttributes
-{
+  implements IEnrollmentAttributes {
   public id!: number;
   public userId!: number;
-  public mentorId!: number;
+  public mentorId!: number | null;
   public trackName!: string;
   public duration!: number;
   public startDate!: Date;
@@ -59,8 +58,7 @@ export class Enrollment
 
 export class CourseEnrollment
   extends Model<ICourseEnrollmentAttributes, ICourseEnrollmentCreationAttributes>
-  implements ICourseEnrollmentAttributes
-{
+  implements ICourseEnrollmentAttributes {
   public id!: number;
   public userId!: number;
   public courseId!: number;
@@ -90,7 +88,7 @@ Enrollment.init(
     },
     mentorId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: Mentor,
         key: "id",
@@ -197,8 +195,17 @@ CourseEnrollment.init(
       allowNull: false,
       defaultValue: "active",
     },
-    createdAt: "",
-    updatedAt: ""
+    // PERBAIKAN: Memberikan tipe data yang benar agar tidak error SQL syntax
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,

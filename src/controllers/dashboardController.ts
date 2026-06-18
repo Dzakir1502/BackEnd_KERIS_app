@@ -1,7 +1,7 @@
 import { AuthRequest } from "@middleware/auth";
 import { Response } from "express";
 import User from "@models/User";
-import { CourseEnrollment } from "@models/Enrollment";
+import { CourseEnrollment, Enrollment } from "@models/Enrollment";
 import Submission from "@models/Submission";
 import { Thread } from "@models/Community";
 import { sendSuccess, sendError } from "@utils/response";
@@ -38,6 +38,11 @@ export const getDashboard = asyncHandler(
       where: { authorId: userId },
     });
 
+    const enrollments = await Enrollment.findAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+    });
+
     sendSuccess(res, "Dashboard retrieved successfully", {
       user: {
         id: user.id,
@@ -53,6 +58,7 @@ export const getDashboard = asyncHandler(
         threadsCreated,
         mentorSessions: 0,
       },
+      enrollments,
       recentActivity: [],
       upcomingMentorSessions: [],
     });

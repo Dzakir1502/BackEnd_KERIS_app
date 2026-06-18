@@ -132,9 +132,29 @@ export const getUserSubmission = asyncHandler(
   }
 );
 
+export const getMySubmissions = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const userId = req.user?.id;
+
+    const submissions = await Submission.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Project,
+          attributes: ["id", "title", "category", "difficulty"],
+        },
+      ],
+      order: [["submittedAt", "DESC"]],
+    });
+
+    sendSuccess(res, "Submissions retrieved successfully", submissions);
+  }
+);
+
 export default {
   getAllProjects,
   getProjectDetail,
   submitProject,
   getUserSubmission,
+  getMySubmissions,
 };

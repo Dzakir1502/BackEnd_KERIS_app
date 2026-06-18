@@ -9,6 +9,9 @@ const router = Router();
 // Get all projects (public)
 router.get("/", projectController.getAllProjects);
 
+// Get all submissions for the authenticated user (must be before /:projectId)
+router.get("/my-submissions", authenticateToken, projectController.getMySubmissions);
+
 // Get project detail (public)
 router.get("/:projectId", projectController.getProjectDetail);
 

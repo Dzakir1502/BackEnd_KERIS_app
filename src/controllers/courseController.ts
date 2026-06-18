@@ -24,7 +24,8 @@ export const getAllCourses = asyncHandler(
 
     const { count, rows } = await Course.findAndCountAll({
       where,
-      include: [{ model: User, as: "instructor", attributes: ["id", "nama_lengkap"] }],
+      // PERBAIKAN DI SINI: Menghapus as: "instructor" agar sesuai dengan definisi Model
+      include: [{ model: User, attributes: ["id", "nama_lengkap"] }],
       offset,
       limit: Number(limit),
     });
@@ -47,7 +48,7 @@ export const getCourseDetail = asyncHandler(
     const course = await Course.findByPk(courseId, {
       include: [
         { model: User, attributes: ["id", "nama_lengkap", "avatar"] },
-        { model: Module, attributes: ["id", "title", "order"] },
+        { model: Module, attributes: ["id", "title", "description", "order", "lessons"] },
       ],
     });
 

@@ -8,7 +8,8 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "seed:admin": "tsx src/seeds/adminSeed.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

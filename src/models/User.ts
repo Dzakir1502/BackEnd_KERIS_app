@@ -72,7 +72,7 @@ User.init(
       defaultValue: "",
     },
     avatar: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.TEXT,
       allowNull: true,
       defaultValue: "",
     },

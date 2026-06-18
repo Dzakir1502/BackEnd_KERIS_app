@@ -2,29 +2,43 @@ import { AuthRequest } from "@middleware/auth";
 import { Response } from "express";
 import { Thread, Reply } from "@models/Community";
 import User from "@models/User";
+import sequelize from "@config/database";
 import { sendSuccess, sendError } from "@utils/response";
 import { asyncHandler } from "@utils/errorHandler";
 import { Op } from "sequelize";
 
 export const getAllThreads = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { page = 1, limit = 10, category, sort = "latest" } = req.query;
+    const { page = 1, limit = 10, category, sort = "latest", mine } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
 
     const where: any = {};
     if (category) where.category = category;
+    // Filter "Postingan Saya" – hanya thread milik user yang sedang login
+    if (mine === "true") {
+      where.authorId = req.user?.id;
+    }
 
-    let order: any[] = [];
-    if (sort === "trending") order = [["likes", "DESC"]];
-    else if (sort === "mostReplied") order = [["views", "DESC"]];
-    else order = [["createdAt", "DESC"]];
+    let order: any[] = [["createdAt", "DESC"]];
+    if (sort === "trending") {
+      // Urutkan berdasarkan jumlah Reply terbanyak, lalu likes
+      order = [
+        [sequelize.literal("(SELECT COUNT(*) FROM replies WHERE replies.threadId = Thread.id)"), "DESC"],
+        ["likes", "DESC"],
+      ];
+    }
 
     const { count, rows } = await Thread.findAndCountAll({
       where,
-      include: [{ model: User, as: "author", attributes: ["id", "nama_lengkap", "avatar"] }],
+      include: [
+        { model: User, as: "author", attributes: ["id", "nama_lengkap", "avatar"] },
+        // Sertakan Replies agar Flutter bisa menghitung jumlahnya
+        { model: Reply, attributes: ["id"] },
+      ],
       offset,
       limit: Number(limit),
       order,
+      distinct: true, // Penting agar count tidak double akibat JOIN
     });
 
     sendSuccess(res, "Threads retrieved successfully", {
